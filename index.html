@@ -5,95 +5,47 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Final Exams Schedule</title>
     <style>
-        body {
-            background-color: #0d1117;
-            color: #c9d1d9;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-        }
-        .container {
-            width: 100%;
-            max-width: 500px;
-            text-align: center;
-        }
-        h1 { color: #58a6ff; }
-        input {
-            padding: 12px;
-            width: 80%;
-            border-radius: 6px;
-            border: 1px solid #30363d;
-            background-color: #0d1117;
-            color: white;
-            margin-bottom: 10px;
-        }
-        button {
-            padding: 10px 20px;
-            background-color: #238636;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-        .card {
-            background-color: #161b22;
-            border: 1px solid #30363d;
-            border-radius: 8px;
-            padding: 15px;
-            margin-top: 15px;
-            text-align: left;
-        }
-        .course-code { color: #79c0ff; font-weight: bold; }
+        body { background-color: #0d1117; color: #c9d1d9; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        .container { width: 100%; max-width: 500px; text-align: center; }
+        input { padding: 12px; width: 80%; border-radius: 6px; border: 1px solid #30363d; background: #0d1117; color: white; margin-bottom: 10px; }
+        button { padding: 10px 20px; background: #238636; color: white; border: none; border-radius: 6px; cursor: pointer; }
+        .card { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 15px; margin-top: 15px; text-align: left; }
+        .course-code { color: #58a6ff; font-weight: bold; }
         .error { color: #f85149; margin-top: 20px; }
     </style>
 </head>
 <body>
-
 <div class="container">
     <h1>Exam Schedule</h1>
-    <p>Enter your ID to see your schedule</p>
-    <input type="text" id="studentId" placeholder="Enter ID (e.g. 241000553)">
+    <input type="text" id="studentId" placeholder="Enter ID (e.g. 211000558)">
     <button onclick="searchSchedule()">Search</button>
-
     <div id="results"></div>
 </div>
-
 <script>
     async function searchSchedule() {
-        const id = document.getElementById('studentId').value;
+        const idInput = document.getElementById('studentId').value.trim();
         const resultsDiv = document.getElementById('results');
-        resultsDiv.innerHTML = "Loading...";
-
+        resultsDiv.innerHTML = "Searching...";
         try {
-            // هيقرأ ملف الـ JSON اللي إنت رفعته
             const response = await fetch('final_exams.json');
             const data = await response.json();
-
-            // بيفترض إن الـ JSON عبارة عن object الـ key فيه هو الـ ID
-            const studentData = data[id];
-
-            if (studentData) {
-                resultsDiv.innerHTML = `<h2>Schedule for ${id}</h2>`;
-                studentData.forEach(exam => {
+            const studentExams = data.filter(item => String(item.id) === idInput);
+            if (studentExams.length > 0) {
+                resultsDiv.innerHTML = `<h2>Schedule for ${idInput}</h2>`;
+                studentExams.forEach(exam => {
                     resultsDiv.innerHTML += `
                         <div class="card">
-                            <div class="course-code">${exam.course || 'Course'}</div>
-                            <div>📅 ${exam.date || 'N/A'}</div>
-                            <div>⏰ ${exam.time || 'N/A'}</div>
-                            <div>📍 Room: ${exam.room || 'N/A'}</div>
-                        </div>
-                    `;
+                            <div class="course-code">${exam.course}</div>
+                            <div>📅 ${exam.date}</div>
+                            <div>⏰ ${exam.time}</div>
+                            <div>📍 Room: ${exam.room}</div>
+                        </div>`;
                 });
             } else {
-                resultsDiv.innerHTML = `<p class="error">ID not found! Check the number and try again.</p>`;
+                resultsDiv.innerHTML = `<p class="error">ID ${idInput} not found!</p>`;
             }
-        } catch (error) {
-            resultsDiv.innerHTML = `<p class="error">Error loading data. Make sure final_exams.json is uploaded.</p>`;
-        }
+        } catch (e) { resultsDiv.innerHTML = `<p class="error">Error loading JSON</p>`; }
     }
 </script>
-
 </body>
 </html>
