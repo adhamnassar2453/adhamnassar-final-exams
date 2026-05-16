@@ -53,7 +53,6 @@
         .exam-info strong { color: #c9d1d9; }
         .error { color: #f85149; margin-top: 20px; font-weight: bold; }
         h2 { font-size: 1.3rem; color: #ffffff; margin-top: 25px; }
-        .debug-box { background: #21262d; padding: 10px; border-radius: 6px; margin-top: 20px; text-align: left; font-size: 12px; max-height: 200px; overflow-y: auto; }
     </style>
 </head>
 <body>
@@ -85,11 +84,15 @@
             
             if (studentExams.length > 0) {
                 studentExams.sort((a, b) => {
-                    const extractDate = (dateStr) => {
-                        const match = dateStr.match(/(January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},\s+\d{4}/i);
-                        return match ? new Date(match[0]) : new Date(0);
+                    const cleanDate = (dateStr) => {
+                        let text = dateStr.substring(dateStr.indexOf('-') + 1).trim();
+                        const parts = text.split(',');
+                        if (parts.length >= 2) {
+                            return parts[1].trim() + (parts[2] ? ',' + parts[2].trim() : '');
+                        }
+                        return text;
                     };
-                    return extractDate(a.date) - extractDate(b.date);
+                    return new Date(cleanDate(a.date)) - new Date(cleanDate(b.date));
                 });
 
                 resultsDiv.innerHTML = `<h2>Schedule for: ${idInput}</h2>`;
@@ -103,8 +106,7 @@
                         </div>`;
                 });
             } else {
-                resultsDiv.innerHTML = `<p class="error">No exams found for "${idInput}".</p>
-                <div class="debug-box"><strong>Debug info (Total items in JSON: ${data.length}):</strong><br>First item sets: ${data[0] ? data[0].students_sets : 'JSON IS EMPTY!'}</div>`;
+                resultsDiv.innerHTML = `<p class="error">No exams found for "${idInput}".</p>`;
             }
         } catch (e) { 
             resultsDiv.innerHTML = `<p class="error">Error loading final_exams.json</p>`; 
