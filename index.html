@@ -64,20 +64,20 @@
     <script>
         let examData = [];
 
-        // نداء الملف بمسار نسبي حافي عشان يشتغل على GitHub Pages بدون مشاكل 404
-        fetch('final_exams.json')
-            .then(res => {
-                if(!res.ok) throw new Error("File not found");
-                return res.json();
-            })
-            .then(data => {
-                examData = data;
-                console.log("JSON loaded successfully!");
-            })
-            .catch(err => {
-                console.error(err);
-                document.getElementById('results').innerHTML = `<p class="error">Error loading JSON</p>`;
-            });
+
+fetch('./final_exams.json')
+    .then(res => {
+        if (!res.ok) throw new Error("File not found");
+        return res.json();
+    })
+    .then(data => {
+        examData = data;
+        console.log("JSON loaded successfully!");
+    })
+    .catch(err => {
+        console.error(err);
+        document.getElementById('results').innerHTML = `<p class="error">Error loading JSON</p>`;
+    });
 
         function searchExam() {
             const idInput = document.getElementById('studentId').value.trim();
