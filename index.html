@@ -58,7 +58,7 @@
 <body>
 <div class="container">
     <h1>Final Exam Schedule</h1>
-    <input type="text" id="studentId" placeholder="Enter Your ID">
+    <input type="text" id="studentId" placeholder="Enter Your ID or Set">
     <button onclick="searchSchedule()">Search</button>
     <div id="results"></div>
 </div>
@@ -77,10 +77,24 @@
         try {
             const response = await fetch('final_exams.json');
             const data = await response.json();
-            const studentExams = data.filter(item => String(item.id) === idInput);
+            
+            let studentExams = data.filter(item => {
+                return item.students_sets && item.students_sets.toLowerCase().includes(idInput.toLowerCase());
+            });
             
             if (studentExams.length > 0) {
-                resultsDiv.innerHTML = `<h2>Schedule for ID: ${idInput}</h2>`;
+                studentExams.sort((a, b) => {
+                    const cleanDate = (dateStr) => {
+                        const parts = dateStr.split(',');
+                        if (parts.length >= 2) {
+                            return parts[1].trim() + (parts[2] ? ',' + parts[2].trim() : '');
+                        }
+                        return dateStr;
+                    };
+                    return new Date(cleanDate(a.date)) - new Date(cleanDate(b.date));
+                });
+
+                resultsDiv.innerHTML = `<h2>Schedule for: ${idInput}</h2>`;
                 studentExams.forEach(exam => {
                     resultsDiv.innerHTML += `
                         <div class="card">
@@ -91,7 +105,7 @@
                         </div>`;
                 });
             } else {
-                resultsDiv.innerHTML = `<p class="error">ID ${idInput} not found in the schedule!</p>`;
+                resultsDiv.innerHTML = `<p class="error">No exams found for "${idInput}".</p>`;
             }
         } catch (e) { 
             resultsDiv.innerHTML = `<p class="error">Error loading final_exams.json</p>`; 
