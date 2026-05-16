@@ -85,12 +85,11 @@
             if (studentExams.length > 0) {
                 studentExams.sort((a, b) => {
                     const cleanDate = (dateStr) => {
-                        let text = dateStr.substring(dateStr.indexOf('-') + 1).trim();
-                        const parts = text.split(',');
+                        const parts = dateStr.split(',');
                         if (parts.length >= 2) {
                             return parts[1].trim() + (parts[2] ? ',' + parts[2].trim() : '');
                         }
-                        return text;
+                        return dateStr;
                     };
                     return new Date(cleanDate(a.date)) - new Date(cleanDate(b.date));
                 });
