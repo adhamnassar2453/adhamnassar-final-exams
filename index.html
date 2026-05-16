@@ -53,6 +53,7 @@
         .exam-info strong { color: #c9d1d9; }
         .error { color: #f85149; margin-top: 20px; font-weight: bold; }
         h2 { font-size: 1.3rem; color: #ffffff; margin-top: 25px; }
+        .debug-box { background: #21262d; padding: 10px; border-radius: 6px; margin-top: 20px; text-align: left; font-size: 12px; max-height: 200px; overflow-y: auto; }
     </style>
 </head>
 <body>
@@ -102,7 +103,8 @@
                         </div>`;
                 });
             } else {
-                resultsDiv.innerHTML = `<p class="error">No exams found for "${idInput}".</p>`;
+                resultsDiv.innerHTML = `<p class="error">No exams found for "${idInput}".</p>
+                <div class="debug-box"><strong>Debug info (Total items in JSON: ${data.length}):</strong><br>First item sets: ${data[0] ? data[0].students_sets : 'JSON IS EMPTY!'}</div>`;
             }
         } catch (e) { 
             resultsDiv.innerHTML = `<p class="error">Error loading final_exams.json</p>`; 
