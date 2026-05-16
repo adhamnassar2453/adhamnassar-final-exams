@@ -1,16 +1,37 @@
 [
-    {
-        "id": "211000558",
-        "course": "CBIO306",
-        "date": "01- Monday, June 01, 2026",
-        "time": "08:30-10:30",
-        "room": "132"
-    },
-    {
-        "id": "221001481",
-        "course": "MTH216",
-        "date": "03- Wednesday, June 03, 2026",
-        "time": "11:00-01:00",
-        "room": "265"
-    }
+  {
+    "id": "241000553",
+    "course": "MTH101 - Calculus I",
+    "date": "Saturday, May 30, 2026",
+    "time": "09:00 AM - 11:00 AM",
+    "room": "Room 201 - Seat 14"
+  },
+  {
+    "id": "211000558",
+    "course": "CBIO306 - Molecular Biology",
+    "date": "Monday, June 01, 2026",
+    "time": "08:30 AM - 10:30 AM",
+    "room": "Room 132 - Seat 05"
+  },
+  {
+    "id": "221001481",
+    "course": "MTH216 - Differential Equations",
+    "date": "Wednesday, June 03, 2026",
+    "time": "11:00 AM - 01:00 PM",
+    "room": "Room 265 - Seat 22"
+  },
+  {
+    "id": "231000214",
+    "course": "SWE221 - Data Structures",
+    "date": "Sunday, May 31, 2026",
+    "time": "09:00 AM - 11:00 AM",
+    "room": "Lab 3 - Seat 08"
+  },
+  {
+    "id": "241000553",
+    "course": "PHYS101 - Physics I",
+    "date": "Tuesday, June 02, 2026",
+    "time": "01:30 PM - 03:30 PM",
+    "room": "Main Hall - Seat 41"
+  }
 ]
