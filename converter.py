@@ -1,83 +1,67 @@
-import pdfplumber
 import json
 
-# اسم الملف اللي شغال عليه (سواء FinalLabExam.pdf أو MTH216-class6.pdf)
-file_name = 'FinalLabExam.pdf' 
-final_data = []
+# داتا المادة النظري MTH216
+theory_students = [
+    {"id": "241002117", "course": "MTH216", "date": "17/5/2026", "time": "7:30 PM", "room": "53 (27C)"},
+    {"id": "241000626", "course": "MTH216", "date": "17/5/2026", "time": "7:30 PM", "room": "53 (27C)"},
+    {"id": "241001596", "course": "MTH216", "date": "17/5/2026", "time": "7:30 PM", "room": "53 (27C)"},
+    {"id": "241001862", "course": "MTH216", "date": "17/5/2026", "time": "7:30 PM", "room": "53 (27C)"},
+    {"id": "241000805", "course": "MTH216", "date": "17/5/2026", "time": "7:30 PM", "room": "53 (27C)"},
+    {"id": "241001872", "course": "MTH216", "date": "17/5/2026", "time": "7:30 PM", "room": "53 (27C)"},
+    {"id": "241000767", "course": "MTH216", "date": "17/5/2026", "time": "7:30 PM", "room": "53 (27C)"},
+    {"id": "241000433", "course": "MTH216", "date": "17/5/2026", "time": "7:30 PM", "room": "53 (27C)"},
+    {"id": "241000629", "course": "MTH216", "date": "17/5/2026", "time": "7:30 PM", "room": "53 (27C)"},
+    {"id": "241000593", "course": "MTH216", "date": "17/5/2026", "time": "7:30 PM", "room": "53 (27C)"},
+    {"id": "231001946", "course": "MTH216", "date": "17/5/2026", "time": "7:30 PM", "room": "53 (27C)"},
+    {"id": "241001401", "course": "MTH216", "date": "17/5/2026", "time": "7:30 PM", "room": "53 (27C)"},
+    {"id": "241001203", "course": "MTH216", "date": "17/5/2026", "time": "7:30 PM", "room": "53 (27C)"},
+    {"id": "241000793", "course": "MTH216", "date": "17/5/2026", "time": "7:30 PM", "room": "53 (27C)"},
+    {"id": "241000307", "course": "MTH216", "date": "17/5/2026", "time": "7:30 PM", "room": "53 (27C)"},
+    {"id": "241001559", "course": "MTH216", "date": "17/5/2026", "time": "7:30 PM", "room": "53 (27C)"},
+    {"id": "241001303", "course": "MTH216", "date": "17/5/2026", "time": "7:30 PM", "room": "53 (27C)"},
+    {"id": "241001509", "course": "MTH216", "date": "17/5/2026", "time": "7:30 PM", "room": "53 (27C)"},
+    {"id": "241001493", "course": "MTH216", "date": "17/5/2026", "time": "7:30 PM", "room": "53 (27C)"},
+    {"id": "241001212", "course": "MTH216", "date": "17/5/2026", "time": "7:30 PM", "room": "53 (27C)"},
+    {"id": "231000250", "course": "MTH216", "date": "17/5/2026", "time": "7:30 PM", "room": "53 (27C)"},
+    {"id": "231000052", "course": "MTH216", "date": "17/5/2026", "time": "7:30 PM", "room": "53 (27C)"},
+    {"id": "241001962", "course": "MTH216", "date": "17/5/2026", "time": "7:30 PM", "room": "53 (27C)"},
+    {"id": "202000064", "course": "MTH216", "date": "17/5/2026", "time": "7:30 PM", "room": "53 (27C)"},
+    {"id": "241001546", "course": "MTH216", "date": "17/5/2026", "time": "7:30 PM", "room": "53 (27C)"},
+    {"id": "241000926", "course": "MTH216", "date": "17/5/2026", "time": "7:30 PM", "room": "53 (27C)"},
+    {"id": "241000390", "course": "MTH216", "date": "17/5/2026", "time": "7:30 PM", "room": "53 (27C)"},
+    {"id": "241000941", "course": "MTH216", "date": "17/5/2026", "time": "7:30 PM", "room": "53 (27C)"}
+]
 
-with pdfplumber.open(file_name) as pdf:
-    for page in pdf.pages:
-        table = page.extract_table()
-        if not table:
-            continue
-            
-        header = [str(cell).strip().lower() if cell else "" for cell in table[0]]
-        
-        # تحديد أماكن الأعمدة بالظبط
-        id_idx, first_name_idx, last_name_idx, room_idx, time_idx = -1, -1, -1, -1, -1
-        for idx, cell in enumerate(header):
-            if 'id' in cell:
-                id_idx = idx
-            elif 'first' in cell:
-                first_name_idx = idx
-            elif 'last' in cell:
-                last_name_idx = idx
-            elif 'room' in cell:
-                room_idx = idx
-            elif 'start' in cell or 'time' in cell:
-                time_idx = idx
+# داتا امتحانات الـ Lab مقسمة بالمواعيد والـ Rooms بالظبط
+lab_students = []
 
-        # قيم افتراضية لو الـ Columns مش واضحة
-        if id_idx == -1: id_idx = 2
-        if first_name_idx == -1: first_name_idx = 0
-        if last_name_idx == -1: last_name_idx = 1
-        if room_idx == -1: room_idx = 3
-        if time_idx == -1: time_idx = 5
+# مواعيد G 29 من 12:30 لـ 12:50
+g29_slot1 = ["241001198", "241000388", "241000465", "241001193", "241000074", "241000365", "241001481", "241002110", "241000974", "241002367", "241001393", "241001763", "241001226", "241000450", "241002082", "241002117", "241001962", "241000415", "231000459", "231002670", "241000253", "241001722", "241000821", "241001321", "211000230", "241000389", "241001619", "241001127", "241001592"]
+# مواعيد G 29 من 13:00 لـ 13:20
+g29_slot2 = ["241001720", "241000603", "241000894", "241000709", "241000822", "242000045", "231001971", "241001253", "221000556", "24100863", "241001843", "241002129", "241001596", "241000070", "241001743", "241001820", "231002504", "241000347", "241001917", "241001601", "241001700", "241001571"]
+# مواعيد G 29 من 13:30 لـ 13:50
+g29_slot3 = ["241001477", "241001721", "241001122", "241002140", "241000736", "241001521", "241002116", "231002131", "241000553"]
+# مواعيد G 29 من 14:00 لـ 14:20
+g29_slot4 = ["241001376", "241000629", "241001493", "231001070", "241001867", "231001619", "241001060", "241000626", "241000960", "241002028", "241000307", "241000433", "241001062", "241001504", "241002518", "241001442", "241001401", "241000287", "241001340", "241001241", "241001510", "241000608", "241001225", "241002036", "241001559", "241000767", "231002120", "241001664", "241001767"]
 
-        # الـ Forward Fill للجروبات واللجان
-        last_room = "53 (27C)" if "mth" in file_name.lower() else "N/A"
-        last_time = "7:30 PM" if "mth" in file_name.lower() else "N/A"
-        
-        default_course = "MTH216" if "mth" in file_name.lower() else "Lab Exam"
-        default_date = "17/5/2026"
+# مواعيد Room 53 من 14:30 لـ 14:50
+r53_slot1 = ["231002331", "241001149", "241001872", "241001940", "241001130", "241001761", "241002002", "241001487", "24100256", "231001049", "241001862", "241001546", "241001323", "241001158", "241001303", "241001848", "241001370", "241000232", "241001234", "241001132", "241001203", "231002512", "211001081", "241001516"]
+# مواعيد Room 53 من 15:00 لـ 15:20
+r53_slot2 = ["231001183", "241001553", "231001964", "241000309", "241002056", "241000926", "241001000"]
+# مواعيد Room 53 من 15:30 لـ 15:50
+r53_slot3 = ["241002282", "241001900", "241001291", "241001255", "251000481", "241000732", "241000996", "241001930", "211001245", "241001167", "231000603", "241001390", "221000564", "231000591", "241001341", "231002487", "231000493", "241001902", "241001941", "241001642", "18101802", "221000082", "19106013", "1510300", "18100523"]
 
-        for row in table[1:]:
-            if not row or id_idx >= len(row) or row[id_idx] is None:
-                continue
-                
-            ids_string = str(row[id_idx]).strip()
-            if ids_string.lower() in ['id', 'id number', 'signature', '#', '']:
-                continue
-            
-            # قراءة اسم الطالب عشان الـ JSON ميبقاش ناقص
-            f_name = str(row[first_name_idx]).strip() if first_name_idx < len(row) and row[first_name_idx] else ""
-            l_name = str(row[last_name_idx]).strip() if last_name_idx < len(row) and row[last_name_idx] else ""
-            full_name = f"{f_name} {l_name}".strip()
+for s_id in g29_slot1: lab_students.append({"id": s_id, "course": "Lab Exam", "date": "17/5/2026", "time": "12:30 - 12:50", "room": "G 29"})
+for s_id in g29_slot2: lab_students.append({"id": s_id, "course": "Lab Exam", "date": "17/5/2026", "time": "13:00 - 13:20", "room": "G 29"})
+for s_id in g29_slot3: lab_students.append({"id": s_id, "course": "Lab Exam", "date": "17/5/2026", "time": "13:30 - 13:50", "room": "G 29"})
+for s_id in g29_slot4: lab_students.append({"id": s_id, "course": "Lab Exam", "date": "17/5/2026", "time": "14:00 - 14:20", "room": "G 29"})
+for s_id in r53_slot1: lab_students.append({"id": s_id, "course": "Lab Exam", "date": "17/5/2026", "time": "14:30 - 14:50", "room": "53"})
+for s_id in r53_slot2: lab_students.append({"id": s_id, "course": "Lab Exam", "date": "17/5/2026", "time": "15:00 - 15:20", "room": "53"})
+for s_id in r53_slot3: lab_students.append({"id": s_id, "course": "Lab Exam", "date": "17/5/2026", "time": "15:30 - 15:50", "room": "53"})
 
-            # تحديث القاعة والوقت لو السطر فيه بيانات الجروب الجديد
-            if room_idx < len(row) and row[room_idx] and str(row[room_idx]).strip(): 
-                last_room = str(row[room_idx]).strip()
-            if time_idx < len(row) and row[time_idx] and str(row[time_idx]).strip(): 
-                last_time = str(row[time_idx]).strip()
-                if time_idx + 1 < len(row) and row[time_idx + 1] and 'end' in header[time_idx + 1]:
-                    last_time += f" - {str(row[time_idx + 1]).strip()}"
+final_data = theory_students + lab_students
 
-            ids_list = ids_string.split('+')
-            for s_id in ids_list:
-                clean_id = s_id.strip()
-                if clean_id and clean_id.isdigit():
-                    # الـ Object كامل بجميع الـ Keys اللي الـ Website مستنيها
-                    final_data.append({
-                        "id": clean_id,
-                        "name": full_name,
-                        "course": default_course,
-                        "date": default_date,
-                        "time": last_time,
-                        "room": last_room
-                    })
-
-# حفظ الفايل بنفس الاسم وبصيغة سليمة 100% يقرأها الـ JavaScript
 with open('final_exams.json', 'w', encoding='utf-8') as f:
-    json.dump(final_data, f, indent=4, ensure_ascii=False)
+    json.dump(final_data, f, ensure_ascii=False, indent=2)
 
-print(f"Done! Created final_exams.json with {len(final_data)} entries.")
+print("Done! JSON file created perfectly.")
