@@ -84,15 +84,11 @@
             
             if (studentExams.length > 0) {
                 studentExams.sort((a, b) => {
-                    const cleanDate = (dateStr) => {
-                        let text = dateStr.substring(dateStr.indexOf('-') + 1).trim();
-                        const parts = text.split(',');
-                        if (parts.length >= 2) {
-                            return parts[1].trim() + (parts[2] ? ',' + parts[2].trim() : '');
-                        }
-                        return text;
+                    const extractDate = (dateStr) => {
+                        const match = dateStr.match(/(January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},\s+\d{4}/i);
+                        return match ? new Date(match[0]) : new Date(0);
                     };
-                    return new Date(cleanDate(a.date)) - new Date(cleanDate(b.date));
+                    return extractDate(a.date) - extractDate(b.date);
                 });
 
                 resultsDiv.innerHTML = `<h2>Schedule for: ${idInput}</h2>`;
