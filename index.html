@@ -7,112 +7,107 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #0f172a;
-            color: #f8fafc;
+            background-color: #0d1117;
+            color: white;
             text-align: center;
-            padding: 50px 20px;
+            padding: 50px;
         }
-        h1 { font-size: 2.5rem; margin-bottom: 30px; }
-        .search-container { margin-bottom: 20px; }
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 30px;
+        }
         input {
-            padding: 12px;
-            width: 100%;
-            max-width: 400px;
-            border: 1px solid #334155;
-            background-color: #1e293b;
-            color: #fff;
-            border-radius: 6px;
-            font-size: 1rem;
-            outline: none;
+            padding: 10px;
+            width: 300px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #30363d;
+            background-color: #161b22;
+            color: white;
         }
         button {
-            padding: 12px 24px;
-            background-color: #16a34a;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #238636;
             color: white;
             border: none;
-            border-radius: 6px;
+            border-radius: 5px;
             cursor: pointer;
-            font-size: 1rem;
-            margin-top: 15px;
+            margin-left: 10px;
         }
-        button:hover { background-color: #15803d; }
-        #results { margin-top: 20px; font-size: 1.2rem; }
-        .error { color: #ef4444; }
-        .success-card {
-            background-color: #1e293b;
-            border: 1px solid #334155;
+        button:hover {
+            background-color: #2ea043;
+        }
+        .result-card {
+            background-color: #161b22;
+            border: 1px solid #30363d;
             padding: 20px;
-            border-radius: 8px;
-            max-width: 450px;
+            border-radius: 10px;
+            width: 400px;
             margin: 20px auto;
             text-align: left;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .result-card p {
+            margin: 10px 0;
+            font-size: 18px;
+        }
+        .error {
+            color: #ff7b72;
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
 
     <h1>Exam Schedule</h1>
-    
-    <div class="search-container">
-        <input type="text" id="studentId" placeholder="Enter Student ID...">
-        <br>
-        <button onclick="searchExam()">Search</button>
-    </div>
+    <input type="text" id="studentId" placeholder="Enter Student ID">
+    <button onclick="searchExam()">Search</button>
 
-    <div id="results"></div>
+    <div id="result"></div>
 
     <script>
         let examData = [];
 
-
-fetch('./final_exams.json')
-    .then(res => {
-        if (!res.ok) throw new Error("File not found");
-        return res.json();
-    })
-    .then(data => {
-        examData = data;
-        console.log("JSON loaded successfully!");
-    })
-    .catch(err => {
-        console.error(err);
-        document.getElementById('results').innerHTML = `<p class="error">Error loading JSON</p>`;
-    });
+        // المسار هنا متظبط على اسم ملف الـ JSON المظبوط اللي في الـ Repo عندك
+        fetch('./final_exams.json')
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.json();
+            })
+            .then(data => {
+                examData = data;
+                console.log("JSON loaded successfully!");
+            })
+            .catch(error => {
+                console.error('Error loading JSON:', error);
+                document.getElementById('result').innerHTML = '<p class="error">Error loading JSON</p>';
+            });
 
         function searchExam() {
             const idInput = document.getElementById('studentId').value.trim();
-            const resultsDiv = document.getElementById('results');
+            const resultDiv = document.getElementById('result');
             
             if (!idInput) {
-                resultsDiv.innerHTML = `<p class="error">Please enter an ID</p>`;
+                resultDiv.innerHTML = '<p class="error">Please enter an ID</p>';
                 return;
             }
 
-            if (examData.length === 0) {
-                resultsDiv.innerHTML = `<p class="error">Data is still loading or failed to load.</p>`;
+            const studentExam = examData.find(item => item.id === idInput);
+
+            if (!studentExam) {
+                resultDiv.innerHTML = '<p class="error">No exams found for this ID.</p>';
                 return;
             }
 
-            // فلترة عشان يجيب كل امتحانات الطالب (النظري والـ Lab)
-            const studentExams = examData.filter(item => item.id === idInput);
-
-            if (studentExams.length === 0) {
-                resultsDiv.innerHTML = `<p class="error">No exams found for this ID.</p>`;
-                return;
-            }
-
-            let htmlContent = '';
-            studentExams.forEach(exam => {
-                htmlContent += `
-                    <div class="success-card">
-                        <p><strong>Course:</strong> ${exam.course}</p>
-                        <p><strong>Date:</strong> ${exam.date}</p>
-                        <p><strong>Time:</strong> ${exam.time}</p>
-                        <p><strong>Room:</strong> ${exam.room}</p>
-                    </div>
-                `;
-            });
-            resultsDiv.innerHTML = htmlContent;
+            resultDiv.innerHTML = `
+                <div class="result-card">
+                    <p><strong>Course:</strong> ${studentExam.course}</p>
+                    <p><strong>Date:</strong> ${studentExam.date}</p>
+                    <p><strong>Time:</strong> ${studentExam.time}</p>
+                    <p><strong>Room:</strong> ${studentExam.room}</p>
+                </div>
+            `;
         }
     </script>
 </body>

@@ -1,67 +1,53 @@
+import pdfplumber
 import json
+import re
 
-# داتا المادة النظري MTH216
-theory_students = [
-    {"id": "241002117", "course": "MTH216", "date": "17/5/2026", "time": "7:30 PM", "room": "53 (27C)"},
-    {"id": "241000626", "course": "MTH216", "date": "17/5/2026", "time": "7:30 PM", "room": "53 (27C)"},
-    {"id": "241001596", "course": "MTH216", "date": "17/5/2026", "time": "7:30 PM", "room": "53 (27C)"},
-    {"id": "241001862", "course": "MTH216", "date": "17/5/2026", "time": "7:30 PM", "room": "53 (27C)"},
-    {"id": "241000805", "course": "MTH216", "date": "17/5/2026", "time": "7:30 PM", "room": "53 (27C)"},
-    {"id": "241001872", "course": "MTH216", "date": "17/5/2026", "time": "7:30 PM", "room": "53 (27C)"},
-    {"id": "241000767", "course": "MTH216", "date": "17/5/2026", "time": "7:30 PM", "room": "53 (27C)"},
-    {"id": "241000433", "course": "MTH216", "date": "17/5/2026", "time": "7:30 PM", "room": "53 (27C)"},
-    {"id": "241000629", "course": "MTH216", "date": "17/5/2026", "time": "7:30 PM", "room": "53 (27C)"},
-    {"id": "241000593", "course": "MTH216", "date": "17/5/2026", "time": "7:30 PM", "room": "53 (27C)"},
-    {"id": "231001946", "course": "MTH216", "date": "17/5/2026", "time": "7:30 PM", "room": "53 (27C)"},
-    {"id": "241001401", "course": "MTH216", "date": "17/5/2026", "time": "7:30 PM", "room": "53 (27C)"},
-    {"id": "241001203", "course": "MTH216", "date": "17/5/2026", "time": "7:30 PM", "room": "53 (27C)"},
-    {"id": "241000793", "course": "MTH216", "date": "17/5/2026", "time": "7:30 PM", "room": "53 (27C)"},
-    {"id": "241000307", "course": "MTH216", "date": "17/5/2026", "time": "7:30 PM", "room": "53 (27C)"},
-    {"id": "241001559", "course": "MTH216", "date": "17/5/2026", "time": "7:30 PM", "room": "53 (27C)"},
-    {"id": "241001303", "course": "MTH216", "date": "17/5/2026", "time": "7:30 PM", "room": "53 (27C)"},
-    {"id": "241001509", "course": "MTH216", "date": "17/5/2026", "time": "7:30 PM", "room": "53 (27C)"},
-    {"id": "241001493", "course": "MTH216", "date": "17/5/2026", "time": "7:30 PM", "room": "53 (27C)"},
-    {"id": "241001212", "course": "MTH216", "date": "17/5/2026", "time": "7:30 PM", "room": "53 (27C)"},
-    {"id": "231000250", "course": "MTH216", "date": "17/5/2026", "time": "7:30 PM", "room": "53 (27C)"},
-    {"id": "231000052", "course": "MTH216", "date": "17/5/2026", "time": "7:30 PM", "room": "53 (27C)"},
-    {"id": "241001962", "course": "MTH216", "date": "17/5/2026", "time": "7:30 PM", "room": "53 (27C)"},
-    {"id": "202000064", "course": "MTH216", "date": "17/5/2026", "time": "7:30 PM", "room": "53 (27C)"},
-    {"id": "241001546", "course": "MTH216", "date": "17/5/2026", "time": "7:30 PM", "room": "53 (27C)"},
-    {"id": "241000926", "course": "MTH216", "date": "17/5/2026", "time": "7:30 PM", "room": "53 (27C)"},
-    {"id": "241000390", "course": "MTH216", "date": "17/5/2026", "time": "7:30 PM", "room": "53 (27C)"},
-    {"id": "241000941", "course": "MTH216", "date": "17/5/2026", "time": "7:30 PM", "room": "53 (27C)"}
-]
+pdf_path = "Spring 2026 - Final Exam Schedule (1).pdf"
+json_path = "final_exams.json"
 
-# داتا امتحانات الـ Lab مقسمة بالمواعيد والـ Rooms بالظبط
-lab_students = []
+exams = []
 
-# مواعيد G 29 من 12:30 لـ 12:50
-g29_slot1 = ["241001198", "241000388", "241000465", "241001193", "241000074", "241000365", "241001481", "241002110", "241000974", "241002367", "241001393", "241001763", "241001226", "241000450", "241002082", "241002117", "241001962", "241000415", "231000459", "231002670", "241000253", "241001722", "241000821", "241001321", "211000230", "241000389", "241001619", "241001127", "241001592"]
-# مواعيد G 29 من 13:00 لـ 13:20
-g29_slot2 = ["241001720", "241000603", "241000894", "241000709", "241000822", "242000045", "231001971", "241001253", "221000556", "24100863", "241001843", "241002129", "241001596", "241000070", "241001743", "241001820", "231002504", "241000347", "241001917", "241001601", "241001700", "241001571"]
-# مواعيد G 29 من 13:30 لـ 13:50
-g29_slot3 = ["241001477", "241001721", "241001122", "241002140", "241000736", "241001521", "241002116", "231002131", "241000553"]
-# مواعيد G 29 من 14:00 لـ 14:20
-g29_slot4 = ["241001376", "241000629", "241001493", "231001070", "241001867", "231001619", "241001060", "241000626", "241000960", "241002028", "241000307", "241000433", "241001062", "241001504", "241002518", "241001442", "241001401", "241000287", "241001340", "241001241", "241001510", "241000608", "241001225", "241002036", "241001559", "241000767", "231002120", "241001664", "241001767"]
+with pdfplumber.open(pdf_path) as pdf:
+    for page in pdf.pages:
+        text = page.extract_text()
+        if not text:
+            continue
+            
+        lines = text.split("\n")
+        current_date = ""
+        current_time = ""
+        
+        for line in lines:
+            # لقط التاريخ
+            if "2026" in line and any(m in line for m in ["January", "February", "March", "April", "May", "June"]):
+                current_date = line.strip()
+                continue
+                
+            # لقط الوقت
+            if "AM" in line or "PM" in line:
+                current_time = line.strip()
+                continue
+                
+            # فلترة: لو السطر فيه ID ومكتوب فيه "Lab" أو "LAB" أعمل له Skip علطول
+            if "Lab" in line or "LAB" in line:
+                continue
+                
+            # لقط السطر اللي فيه الـ ID والمادة والمدرج
+            match = re.search(r"(\d{9})\s+([A-Z]{3,4}\d{3})\s+(.*)", line)
+            if match:
+                student_id = match.group(1)
+                course = match.group(2)
+                room = match.group(3).strip()
+                
+                exams.append({
+                    "id": student_id,
+                    "course": course,
+                    "date": current_date,
+                    "time": current_time,
+                    "room": room
+                })
 
-# مواعيد Room 53 من 14:30 لـ 14:50
-r53_slot1 = ["231002331", "241001149", "241001872", "241001940", "241001130", "241001761", "241002002", "241001487", "24100256", "231001049", "241001862", "241001546", "241001323", "241001158", "241001303", "241001848", "241001370", "241000232", "241001234", "241001132", "241001203", "231002512", "211001081", "241001516"]
-# مواعيد Room 53 من 15:00 لـ 15:20
-r53_slot2 = ["231001183", "241001553", "231001964", "241000309", "241002056", "241000926", "241001000"]
-# مواعيد Room 53 من 15:30 لـ 15:50
-r53_slot3 = ["241002282", "241001900", "241001291", "241001255", "251000481", "241000732", "241000996", "241001930", "211001245", "241001167", "231000603", "241001390", "221000564", "231000591", "241001341", "231002487", "231000493", "241001902", "241001941", "241001642", "18101802", "221000082", "19106013", "1510300", "18100523"]
+with open(json_path, "w", encoding="utf-8") as f:
+    json.dump(exams, f, indent=4, ensure_ascii=False)
 
-for s_id in g29_slot1: lab_students.append({"id": s_id, "course": "Lab Exam", "date": "17/5/2026", "time": "12:30 - 12:50", "room": "G 29"})
-for s_id in g29_slot2: lab_students.append({"id": s_id, "course": "Lab Exam", "date": "17/5/2026", "time": "13:00 - 13:20", "room": "G 29"})
-for s_id in g29_slot3: lab_students.append({"id": s_id, "course": "Lab Exam", "date": "17/5/2026", "time": "13:30 - 13:50", "room": "G 29"})
-for s_id in g29_slot4: lab_students.append({"id": s_id, "course": "Lab Exam", "date": "17/5/2026", "time": "14:00 - 14:20", "room": "G 29"})
-for s_id in r53_slot1: lab_students.append({"id": s_id, "course": "Lab Exam", "date": "17/5/2026", "time": "14:30 - 14:50", "room": "53"})
-for s_id in r53_slot2: lab_students.append({"id": s_id, "course": "Lab Exam", "date": "17/5/2026", "time": "15:00 - 15:20", "room": "53"})
-for s_id in r53_slot3: lab_students.append({"id": s_id, "course": "Lab Exam", "date": "17/5/2026", "time": "15:30 - 15:50", "room": "53"})
-
-final_data = theory_students + lab_students
-
-with open('final_exams.json', 'w', encoding='utf-8') as f:
-    json.dump(final_data, f, ensure_ascii=False, indent=2)
-
-print("Done! JSON file created perfectly.")
+print(f"Done! Saved {len(exams)} final exams to {json_path}")
