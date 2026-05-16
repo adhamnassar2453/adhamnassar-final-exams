@@ -1,53 +1,31 @@
 import pdfplumber
 import json
-import re
 
-pdf_path = "Spring 2026 - Final Exam Schedule (1).pdf"
-json_path = "final_exams.json"
+file_name = 'Spring 2026 - Final Exam Schedule.pdf' 
+final_data = []
 
-exams = []
-
-with pdfplumber.open(pdf_path) as pdf:
+with pdfplumber.open(file_name) as pdf:
     for page in pdf.pages:
-        text = page.extract_text()
-        if not text:
-            continue
-            
-        lines = text.split("\n")
-        current_date = ""
-        current_time = ""
-        
-        for line in lines:
-            # لقط التاريخ
-            if "2026" in line and any(m in line for m in ["January", "February", "March", "April", "May", "June"]):
-                current_date = line.strip()
-                continue
+        table = page.extract_table()
+        if table:
+            for row in table[1:]: # Ben-seb el header
+                # Edit el indexes de 3ala 7asab tartib el columns f malafak
+                # Masalan: 0=Date, 1=Time, 2=Room, 3=Course, 4=IDs
+                ids_string = str(row[4]) if row[4] else ""
+                ids_list = ids_string.split('+')
                 
-            # لقط الوقت
-            if "AM" in line or "PM" in line:
-                current_time = line.strip()
-                continue
-                
-            # فلترة: لو السطر فيه ID ومكتوب فيه "Lab" أو "LAB" أعمل له Skip علطول
-            if "Lab" in line or "LAB" in line:
-                continue
-                
-            # لقط السطر اللي فيه الـ ID والمادة والمدرج
-            match = re.search(r"(\d{9})\s+([A-Z]{3,4}\d{3})\s+(.*)", line)
-            if match:
-                student_id = match.group(1)
-                course = match.group(2)
-                room = match.group(3).strip()
-                
-                exams.append({
-                    "id": student_id,
-                    "course": course,
-                    "date": current_date,
-                    "time": current_time,
-                    "room": room
-                })
+                for s_id in ids_list:
+                    clean_id = s_id.strip()
+                    if clean_id:
+                        final_data.append({
+                            "id": clean_id,
+                            "course": str(row[3]),
+                            "date": str(row[0]),
+                            "time": str(row[1]),
+                            "room": str(row[2])
+                        })
 
-with open(json_path, "w", encoding="utf-8") as f:
-    json.dump(exams, f, indent=4, ensure_ascii=False)
+with open('final_exams.json', 'w', encoding='utf-8') as f:
+    json.dump(final_data, f, indent=4)
 
-print(f"Done! Saved {len(exams)} final exams to {json_path}")
+print(f"Done! Extracted {len(final_data)} entries from PDF.")
