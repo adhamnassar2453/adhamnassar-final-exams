@@ -1,31 +1,41 @@
 import pdfplumber
 import json
+import re
 
-file_name = 'Spring 2026 - Final Exam Schedule.pdf' 
-final_data = []
+pdf_path = "Spring 2026 - Final Exam Schedule (1).pdf"
+output_json = "final_exams.json"
 
-with pdfplumber.open(file_name) as pdf:
+exams_data = []
+
+with pdfplumber.open(pdf_path) as pdf:
     for page in pdf.pages:
         table = page.extract_table()
-        if table:
-            for row in table[1:]: # Ben-seb el header
-                # Edit el indexes de 3ala 7asab tartib el columns f malafak
-                # Masalan: 0=Date, 1=Time, 2=Room, 3=Course, 4=IDs
-                ids_string = str(row[4]) if row[4] else ""
-                ids_list = ids_string.split('+')
+        if not table:
+            continue
+            
+        for row in table:
+            if not row or len(row) < 5:
+                continue
                 
-                for s_id in ids_list:
-                    clean_id = s_id.strip()
-                    if clean_id:
-                        final_data.append({
-                            "id": clean_id,
-                            "course": str(row[3]),
-                            "date": str(row[0]),
-                            "time": str(row[1]),
-                            "room": str(row[2])
-                        })
+            date = row[0]
+            time = row[1]
+            room = row[2]
+            course = row[3]
+            students_sets_text = row[4]
+            
+            if "Day" in str(date) or not course:
+                continue
+                
+            if students_sets_text:
+                student_ids = re.findall(r'\b\d{9}\b', str(students_sets_text))
+                for s_id in student_ids:
+                    exams_data.append({
+                        "id": str(s_id).strip(),
+                        "course": str(course).strip(),
+                        "date": str(date).replace('\n', ' ').strip(),
+                        "time": str(time).replace('\n', ' ').strip(),
+                        "room": str(room).replace('\n', ' ').strip()
+                    })
 
-with open('final_exams.json', 'w', encoding='utf-8') as f:
-    json.dump(final_data, f, indent=4)
-
-print(f"Done! Extracted {len(final_data)} entries from PDF.")
+with open(output_json, 'w', encoding='utf-8') as f:
+    json.dump(exams_data, f, ensure_ascii=False, indent=4)
